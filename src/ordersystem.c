@@ -6,10 +6,10 @@ static int downOrder[3] = {0, 0, 0};
 static int destination[4] = {0, 0, 0, 0};
 
 void order(int up, int floor){
-	if(up){
+	if(up && floor != 3){
 		upOrder[floor] = 1;
 		elev_set_button_lamp(BUTTON_CALL_UP, floor, 1);
-	}else{
+	}else if(floor != 0){
 		downOrder[floor - 1] = 1;
 		elev_set_button_lamp(BUTTON_CALL_DOWN, floor, 1);
 	}
@@ -52,22 +52,30 @@ void updateOrder(){
 */
 void removeOrder(int floor){
 	elev_set_button_lamp(BUTTON_COMMAND, floor, 0);
-	elev_set_button_lamp(BUTTON_CALL_UP, floor, 0);
-	elev_set_button_lamp(BUTTON_CALL_DOWN, floor, 0);
+	if(floor != 3){
+		elev_set_button_lamp(BUTTON_CALL_UP, floor, 0);
+	}
+	if(floor != 0){
+		elev_set_button_lamp(BUTTON_CALL_DOWN, floor, 0);
+	}
 	
 	switch(floor){
 	case 0:
+		destination[0] = 0;
 		upOrder[0] = 0;
 		return;
 	case 1:
+		destination[1] = 0;
 		upOrder[1] = 0;
 		downOrder[0] = 0;
 		return;
 	case 2:
+		destination[2] = 0;
 		upOrder[2] = 0;
 		downOrder[1] = 0;
 		return;
 	case 3:
+		destination[3] = 0;
 		downOrder[2] = 0;
 	}
 }
