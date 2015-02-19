@@ -6,7 +6,7 @@ TARGET := bin/runner
 SRCEXT := c
 SOURCES := $(shell find $(SRCDIR) -type f -name *.$(SRCEXT))
 OBJECTS := $(patsubst $(SRCDIR)/%,$(BUILDDIR)/%,$(SOURCES:.$(SRCEXT)=.o))
-CFLAGS := -g -Wall
+CFLAGS := -g -Wall -std=c11
 
 $(TARGET): $(OBJECTS)
 	@echo "Linking..."
