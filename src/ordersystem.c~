@@ -14,7 +14,7 @@ void order(int up, int floor){
 		downOrder[floor] = 1;
 		elev_set_button_lamp(BUTTON_CALL_DOWN, floor + 1, 1);
 	}
-	printf("uporder %d%d%d downorder %d%d%d \n",  getOrder(1, 0), getOrder(1, 1), getOrder(1, 2), getOrder(0, 1), getOrder(0, 2), getOrder(0, 3));
+	printf("uporder %d%d%d downorder %d%d%d \n",  upOrder[0], upOrder[1], upOrder[2], downOrder[0], downOrder[1], downOrder[2]);
 }
 
 void orderDestination(int floor){

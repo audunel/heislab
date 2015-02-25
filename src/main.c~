@@ -23,7 +23,7 @@ int main() {
     int destinationButton[4] = {0, 0, 0, 0};
     int lastDestinationButton[4];
     for(int c = 0; c < 3; c++){
-    	printf("%d %d ", getOrder(0, c + 1), getOrder(1, c));
+    	printf("%d %d", getOrder(0, c + 1), getOrder(1, c));
     }
     while (1) {
 		lastFloor = floor;
