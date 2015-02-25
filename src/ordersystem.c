@@ -1,18 +1,20 @@
 #include "ordersystem.h"
 #include "elev.h"
+#include <stdio.h>
 
 static int upOrder[3] = {0, 0, 0};
 static int downOrder[3] = {0, 0, 0};
 static int destination[4] = {0, 0, 0, 0};
 
 void order(int up, int floor){
-	if(up && floor != 3){
+	if(up){
 		upOrder[floor] = 1;
 		elev_set_button_lamp(BUTTON_CALL_UP, floor, 1);
-	}else if(floor != 0){
-		downOrder[floor - 1] = 1;
-		elev_set_button_lamp(BUTTON_CALL_DOWN, floor, 1);
+	}else {
+		downOrder[floor] = 1;
+		elev_set_button_lamp(BUTTON_CALL_DOWN, floor + 1, 1);
 	}
+	printf("uporder %d%d%d downorder %d%d%d \n",  upOrder[0], upOrder[1], upOrder[2], downOrder[0], downOrder[1], downOrder[2]);
 }
 
 void orderDestination(int floor){
@@ -63,21 +65,22 @@ void removeOrder(int floor){
 	case 0:
 		destination[0] = 0;
 		upOrder[0] = 0;
-		return;
+		break;
 	case 1:
 		destination[1] = 0;
 		upOrder[1] = 0;
 		downOrder[0] = 0;
-		return;
+		break;
 	case 2:
 		destination[2] = 0;
 		upOrder[2] = 0;
 		downOrder[1] = 0;
-		return;
+		break;
 	case 3:
 		destination[3] = 0;
 		downOrder[2] = 0;
 	}
+	printf("S, uporder %d%d%d downorder %d%d%d \n",  upOrder[0], upOrder[1], upOrder[2], downOrder[0], downOrder[1], downOrder[2]);
 }
 
 void clearAll(){
