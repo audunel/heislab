@@ -1,1 +1,0 @@
-void sleep(int seconds);
