@@ -9,10 +9,12 @@ int main() {
         printf("Unable to initialize elevator hardware!\n");
         return 1;
     }
+    
+    initialize();
 
-    printf("Press STOP button to stop elevator and exit program.\n");
+    //printf("Press STOP button to stop elevator and exit program.\n");
 
-    elev_set_motor_direction(DIRN_UP);
+    //elev_set_motor_direction(DIRN_UP);
 
     int floor = -1;
     int lastFloor;
@@ -22,9 +24,9 @@ int main() {
     int lastDownButton[4];
     int destinationButton[4] = {0, 0, 0, 0};
     int lastDestinationButton[4];
-    for(int c = 0; c < 3; c++){
-    	printf("%d %d ", getOrder(0, c + 1), getOrder(1, c));
-    }
+    int timedOut = 1;
+    int lastTimedOut;
+
     while (1) {
 		lastFloor = floor;
 		floor = elev_get_floor_sensor_signal();
@@ -51,7 +53,9 @@ int main() {
 				orderButton(1, c);
 			}
 		}
-		if (stoptime < clock()){
+		lastTimedOut = timedOut;
+		timedOut = stoptime < clock();
+		if (timedOut == 1 && lastTimedOut == 0){
 			timeout();
 		}
 		if (elev_get_stop_signal()){

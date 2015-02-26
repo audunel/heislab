@@ -43,8 +43,6 @@ void removeOrder(int floor){
 	destination[floor] = 0;
 	upOrder[floor] = 0;
 	downOrder[floor] = 0;
-	
-	printf("S, uporder %d%d%d downorder %d%d%d \n",  upOrder[0], upOrder[1], upOrder[2], downOrder[0], downOrder[1], downOrder[2]);
 }
 
 void clearAll(){
