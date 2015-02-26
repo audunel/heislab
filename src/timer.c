@@ -6,6 +6,6 @@ void startTimeout() {
 	stopTime = clock() + 3 * CLOCKS_PER_SEC;
 }
 
-bool isTimeout() {
+int isTimeout() {
 	return clock() < stopTime;
 }

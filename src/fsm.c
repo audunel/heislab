@@ -57,15 +57,14 @@ void orderButton(int up, int floor){
 		if(elev_get_floor_sensor_signal() > floor){
 			printf("downwards\n");
 			state = downwards;
-			//elev_set_motor_direction(DIRN_DOWN);
+			order(up, floor);
 		}else if(elev_get_floor_sensor_signal() < floor){
 			printf("upwards\n");
 			state = upwards;
-			//elev_set_motor_direction(DIRN_UP);
+			order(up, floor);
 		}else{
-			stoptime = clock() + 3 * CLOCKS_PER_SEC;
+			doorOpen(floor);
 		}
-		order(up, floor);
 		break;		
 	default:
 		order(up, floor);
@@ -77,14 +76,13 @@ void destinationButtonPressed(int floor){
 	case wait:
 		if(elev_get_floor_sensor_signal() > floor){
 			state = downwards;
-			elev_set_motor_direction(DIRN_DOWN);
+			orderDestination(floor);
 		}else if(elev_get_floor_sensor_signal() < floor){
 			state = upwards;
-			elev_set_motor_direction(DIRN_UP);
+			orderDestination(floor);
 		}else{
-			stoptime = clock() + 3 * CLOCKS_PER_SEC;
+			doorOpen(floor);
 		}
-		orderDestination(floor);
 		break;
 	default:
 		orderDestination(floor);
@@ -127,4 +125,15 @@ void timeout(){
 		elev_set_motor_direction(DIRN_DOWN);
 		break;
 	}
+}
+
+void stopButtonPressed(){
+	elev_set_motor_direction(DIRN_STOP);
+	state = stop;
+	clearAll();
+	if(elev_get_floor_sensor_signal() != -1) {
+		elev_set_door_open_lamp(1);
+	}
+	while(elev_get_stop_signal()){}
+	elev_set_door_open_lamp(0);
 }
