@@ -16,10 +16,10 @@ int main() {
 
     int floor = -1;
     int lastFloor;
-    int upButton[3] = {0, 0, 0};
-    int lastUpButton[3];
-    int downButton[3] = {0, 0, 0};
-    int lastDownButton[3];
+    int upButton[4] = {0, 0, 0, 0};
+    int lastUpButton[4];
+    int downButton[4] = {0, 0, 0, 0};
+    int lastDownButton[4];
     int destinationButton[4] = {0, 0, 0, 0};
     int lastDestinationButton[4];
     for(int c = 0; c < 3; c++){
@@ -40,10 +40,10 @@ int main() {
 			}
 		}
 		for (int c = 0; c < 3; c++){
-			lastDownButton[c] = downButton[c];
-			downButton[c] = elev_get_button_signal(BUTTON_CALL_DOWN, c + 1);
-			if (downButton[c] && !lastDownButton[c]){
-				orderButton(0, c);
+			lastDownButton[c + 1] = downButton[c + 1];
+			downButton[c + 1] = elev_get_button_signal(BUTTON_CALL_DOWN, c + 1);
+			if (downButton[c + 1] && !lastDownButton[c + 1]){
+				orderButton(0, c + 1);
 			}
 			lastUpButton[c] = upButton[c];
 			upButton[c] = elev_get_button_signal(BUTTON_CALL_UP, c);

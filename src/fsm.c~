@@ -21,9 +21,6 @@ states orderUp(int floor){
 		}
 	}
 	for (int c = floor - 1; c >= 0; c--){
-		for(int c = 0; c < 3; c++){
-    			printf("%d %d \n", getOrder(0, c + 1), getOrder(1, c));
-    		}
 		printf("floor %d, %d, %d\n", floor, c, getOrder(0, c) || getOrder(1, c));
 		if(getDestination(c) || getOrder(0, c) || getOrder(1, c)){
 			printf("downwards\n");
@@ -44,9 +41,6 @@ states orderDown(int floor){
 		}
 	}
 	for (int c = floor + 1; c < 4; c++){
-		for(int c = 0; c < 3; c++){
-    			printf("%d %d \n", getOrder(0, c + 1), getOrder(1, c));
-    		}
 		printf("floor %d, %d, %d\n", floor, c, getOrder(0, c) || getOrder(1, c)); 
 		if(getDestination(c) || getOrder(0, c) || getOrder(1, c)){
 			printf("upwards\n");
@@ -63,11 +57,11 @@ void orderButton(int up, int floor){
 		if(elev_get_floor_sensor_signal() > floor){
 			printf("downwards\n");
 			state = downwards;
-			elev_set_motor_direction(DIRN_DOWN);
+			//elev_set_motor_direction(DIRN_DOWN);
 		}else if(elev_get_floor_sensor_signal() < floor){
 			printf("upwards\n");
 			state = upwards;
-			elev_set_motor_direction(DIRN_UP);
+			//elev_set_motor_direction(DIRN_UP);
 		}else{
 			stoptime = clock() + 3 * CLOCKS_PER_SEC;
 		}
@@ -101,6 +95,7 @@ void doorOpen(int floor){
 	elev_set_motor_direction(DIRN_STOP);
 	stoptime = clock() + 3 * CLOCKS_PER_SEC;
 	removeOrder(floor);
+	elev_set_door_open_lamp(1);
 }
 
 void floorSignal(int floor){
