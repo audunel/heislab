@@ -12,30 +12,30 @@ static int floorBelow; // Den nærmeste etasjen i retning ned.
 int stoptime;
 
 
-// getDirection1 brukes når heisen sist var på vei oppover. I motsatt tilfelle brukes getDirection2.
+// fsm_getDirection1 brukes når heisen sist var på vei oppover. I motsatt tilfelle brukes getDirection2.
 
-states getDirection1(int floor){
+states fsm_getDirection1(int floor){
 	for (int c = floor + 1; c < 4; c++){
-		if(getDestination(c) || getOrder(0, c) || getOrder(1, c)){
+		if(ordersystem_getDestination(c) || ordersystem_getOrder(0, c) || ordersystem_getOrder(1, c)){
 			return upwards;
 		}
 	}
 	for (int c = floor - 1; c >= 0; c--){
-		if(getDestination(c) || getOrder(0, c) || getOrder(1, c)){
+		if(ordersystem_getDestination(c) || ordersystem_getOrder(0, c) || ordersystem_getOrder(1, c)){
 			return downwards;
 		}
 	}
 	return wait;
 }
 
-states getDirection2(int floor){
+states fsm_getDirection2(int floor){
 	for (int c = floor - 1; c >= 0; c--){
-		if(getDestination(c) || getOrder(0, c) || getOrder(1, c)){
+		if(ordersystem_getDestination(c) || ordersystem_getOrder(0, c) || ordersystem_getOrder(1, c)){
 			return downwards;
 		}
 	}
 	for (int c = floor + 1; c < 4; c++){
-		if(getDestination(c) || getOrder(0, c) || getOrder(1, c)){
+		if(ordersystem_getDestination(c) || ordersystem_getOrder(0, c) || ordersystem_getOrder(1, c)){
 			return upwards;
 		}
 	}
@@ -43,15 +43,15 @@ states getDirection2(int floor){
 }
 
 
-// orderButtonPressed er for knappene "utenfor" heisen. up == 0 impliserer at ned knappen har blitt trykket.
+// fsm_orderButtonPressed er for knappene "utenfor" heisen. up == 0 impliserer at ned knappen har blitt trykket.
 
-void orderButtonPressed(int up, int floor){ 
+void fsm_orderButtonPressed(int up, int floor){ 
 	switch (state){
 	case wait:
 		if(elev_get_floor_sensor_signal() > floor){
 
 			state = downwards;
-			order(up, floor);
+			ordersystem_order(up, floor);
 
 			if(stoptime < clock()){
 				elev_set_motor_direction(DIRN_DOWN);
@@ -59,7 +59,7 @@ void orderButtonPressed(int up, int floor){
 		}else if(elev_get_floor_sensor_signal() < floor){
 
 			state = upwards;
-			order(up, floor);
+			ordersystem_order(up, floor);
 
 			if(stoptime < clock()){
 
@@ -67,7 +67,7 @@ void orderButtonPressed(int up, int floor){
 				floorBelow++;
 			}
 		}else{
-			doorOpen(floor);
+			fsm_doorOpen(floor);
 		}
 		break;
 	case stop:
@@ -75,7 +75,7 @@ void orderButtonPressed(int up, int floor){
 			if(elev_get_floor_sensor_signal() > floor){
 
 				state = downwards;
-				order(up, floor);
+				ordersystem_order(up, floor);
 				elev_set_door_open_lamp(0);
 
 				if(stoptime < clock()){
@@ -86,18 +86,18 @@ void orderButtonPressed(int up, int floor){
 
 				elev_set_door_open_lamp(0);
 				state = upwards;
-				order(up, floor);
+				ordersystem_order(up, floor);
 
 				if(stoptime < clock()){
 					floorBelow++;
 					elev_set_motor_direction(DIRN_UP);
 				}
 			}else{
-				doorOpen(floor);
+				fsm_doorOpen(floor);
 				state = wait;
 			}
 		}else{
-			order(up, floor);
+			ordersystem_order(up, floor);
 
 			if(floorBelow >= floor){
 				state = downwards;
@@ -110,22 +110,22 @@ void orderButtonPressed(int up, int floor){
 		break;
 		
 	default:
-		order(up, floor);
+		ordersystem_order(up, floor);
 	}
 }
 
 
 /*
-destinationButtonPressed er for knappene "innenfor" heisen. Denne funksjonen er for øvrig identisk med orderButtonPressed med unntak av
-at orderDestination kalles istedenfor order */
+fsm_destinationButtonPressed er for knappene "innenfor" heisen. Denne funksjonen er for øvrig identisk med fsm_orderButtonPressed med unntak av
+at ordersystem_orderDestination kalles istedenfor order */
  
-void destinationButtonPressed(int floor){
+void fsm_destinationButtonPressed(int floor){
 	switch (state){
 	case wait:
 		if(elev_get_floor_sensor_signal() > floor){
 
 			state = downwards;
-			orderDestination(floor);
+			ordersystem_orderDestination(floor);
 
 			if(stoptime < clock()){
 				elev_set_motor_direction(DIRN_DOWN);
@@ -133,14 +133,14 @@ void destinationButtonPressed(int floor){
 		}else if(elev_get_floor_sensor_signal() < floor){
 
 			state = upwards;
-			orderDestination(floor);
+			ordersystem_orderDestination(floor);
 
 			if(stoptime < clock()){
 				elev_set_motor_direction(DIRN_UP);
 				floorBelow++;
 			}
 		}else{
-			doorOpen(floor);
+			fsm_doorOpen(floor);
 		}
 		break;
 	case stop:
@@ -149,7 +149,7 @@ void destinationButtonPressed(int floor){
 			if(elev_get_floor_sensor_signal() > floor){
 
 				state = downwards;
-				orderDestination(floor);
+				ordersystem_orderDestination(floor);
 				elev_set_door_open_lamp(0);
 
 				if(stoptime < clock()){
@@ -160,18 +160,18 @@ void destinationButtonPressed(int floor){
 
 				elev_set_door_open_lamp(0);
 				state = upwards;
-				orderDestination(floor);
+				ordersystem_orderDestination(floor);
 
 				if(stoptime < clock()){
 					floorBelow++;
 					elev_set_motor_direction(DIRN_UP);
 				}
 			}else{
-				doorOpen(floor);
+				fsm_doorOpen(floor);
 				state = wait;
 			}
 		}else{
-			orderDestination(floor);
+			ordersystem_orderDestination(floor);
 
 			if(floorBelow >= floor){
 
@@ -186,41 +186,43 @@ void destinationButtonPressed(int floor){
 		break;
 	
 	default:
-		orderDestination(floor);
+		ordersystem_orderDestination(floor);
 	}
 }
 
-void doorOpen(int floor){
+void fsm_doorOpen(int floor){
 	elev_set_motor_direction(DIRN_STOP);
 	stoptime = clock() + 3 * CLOCKS_PER_SEC;
-	removeOrder(floor);
+	ordersystem_removeOrder(floor);
 	elev_set_door_open_lamp(1);
 }
 
-void floorSignal(int floor){
+void fsm_floorSignal(int floor){
 	switch (state){
 	case upwards:
-		state = getDirection1(floor);
-		if (getDestination(floor) || getOrder(1, floor) || state != upwards){
+		state = fsm_getDirection1(floor);
+		if (ordersystem_getDestination(floor) || ordersystem_getOrder(1, floor) || state != upwards){
 
-			doorOpen(floor);
+			fsm_doorOpen(floor);
 		}else{
 			floorBelow++;
 		}
 		break;
 	case downwards:
-		state = getDirection2(floor);
+		state = fsm_getDirection2(floor);
 
-		if (getDestination(floor) || getOrder(0, floor) || state != downwards){
-			doorOpen(floor);
+		if (ordersystem_getDestination(floor) || ordersystem_getOrder(0, floor) || state != downwards){
+			fsm_doorOpen(floor);
 		}
 
 		floorBelow--;
 		break;
+	default:
+		break;
 	}
 }
 
-void timeout(){
+void fsm_timeout(){
 	switch (state){
 	case upwards:
 		elev_set_motor_direction(DIRN_UP);
@@ -233,14 +235,17 @@ void timeout(){
 		break;
 	case wait:
 		elev_set_door_open_lamp(0);
+		break;
+	default:
+		break;
 	}
 }
 
-void stopButtonPressed(){
+void fsm_stopButtonPressed(){
 
 	elev_set_motor_direction(DIRN_STOP);
 	state = stop;
-	clearAll();
+	ordersystem_clearAll();
 
 	if(elev_get_floor_sensor_signal() != -1) {
 		elev_set_door_open_lamp(1);
@@ -251,7 +256,7 @@ void stopButtonPressed(){
 	elev_set_stop_lamp(0);
 }
 
-void initialize(){
+void fsm_initialize(){
 	int floor = elev_get_floor_sensor_signal();
 	if(floor != -1){
 
