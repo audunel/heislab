@@ -1,18 +1,17 @@
 #include "elev.h"
 #include "ordersystem.h"
 #include "fsm.h"
+#include "timer.h"
 #include <stdio.h>
-#include "time.h"
 
 typedef enum {downwards, wait, upwards, stop} states;
 
 static states state;
 static int floorBelow; // Den nærmeste etasjen i retning ned.
 
-int stoptime;
-
-
-// fsm_getDirection1 brukes når heisen sist var på vei oppover. I motsatt tilfelle brukes getDirection2.
+/*
+fsm_getDirection1 brukes når heisen sist var på vei oppover. I motsatt tilfelle brukes fsm_getDirection2.
+*/
 
 states fsm_getDirection1(int floor){
 	for (int c = floor + 1; c < 4; c++){
@@ -43,7 +42,9 @@ states fsm_getDirection2(int floor){
 }
 
 
-// fsm_orderButtonPressed er for knappene "utenfor" heisen. up == 0 impliserer at ned knappen har blitt trykket.
+/*
+fsm_orderButtonPressed er for knappene "utenfor" heisen. up == 0 impliserer at ned knappen har blitt trykket.
+*/
 
 void fsm_orderButtonPressed(int up, int floor){ 
 	switch (state){
@@ -53,7 +54,7 @@ void fsm_orderButtonPressed(int up, int floor){
 			state = downwards;
 			ordersystem_order(up, floor);
 
-			if(stoptime < clock()){
+			if(timer_isTimeout()){
 				elev_set_motor_direction(DIRN_DOWN);
 			}
 		}else if(elev_get_floor_sensor_signal() < floor){
@@ -61,7 +62,7 @@ void fsm_orderButtonPressed(int up, int floor){
 			state = upwards;
 			ordersystem_order(up, floor);
 
-			if(stoptime < clock()){
+			if(timer_isTimeout()){
 
 				elev_set_motor_direction(DIRN_UP);
 				floorBelow++;
@@ -78,7 +79,7 @@ void fsm_orderButtonPressed(int up, int floor){
 				ordersystem_order(up, floor);
 				elev_set_door_open_lamp(0);
 
-				if(stoptime < clock()){
+				if(timer_isTimeout()){
 					elev_set_motor_direction(DIRN_DOWN);
 				}
 
@@ -88,7 +89,7 @@ void fsm_orderButtonPressed(int up, int floor){
 				state = upwards;
 				ordersystem_order(up, floor);
 
-				if(stoptime < clock()){
+				if(timer_isTimeout()){
 					floorBelow++;
 					elev_set_motor_direction(DIRN_UP);
 				}
@@ -117,7 +118,8 @@ void fsm_orderButtonPressed(int up, int floor){
 
 /*
 fsm_destinationButtonPressed er for knappene "innenfor" heisen. Denne funksjonen er for øvrig identisk med fsm_orderButtonPressed med unntak av
-at ordersystem_orderDestination kalles istedenfor order */
+at ordersystem_orderDestination kalles istedenfor ordersystem_order
+*/
  
 void fsm_destinationButtonPressed(int floor){
 	switch (state){
@@ -127,7 +129,7 @@ void fsm_destinationButtonPressed(int floor){
 			state = downwards;
 			ordersystem_orderDestination(floor);
 
-			if(stoptime < clock()){
+			if(timer_isTimeout()){
 				elev_set_motor_direction(DIRN_DOWN);
 			}
 		}else if(elev_get_floor_sensor_signal() < floor){
@@ -135,7 +137,7 @@ void fsm_destinationButtonPressed(int floor){
 			state = upwards;
 			ordersystem_orderDestination(floor);
 
-			if(stoptime < clock()){
+			if(timer_isTimeout()){
 				elev_set_motor_direction(DIRN_UP);
 				floorBelow++;
 			}
@@ -152,7 +154,7 @@ void fsm_destinationButtonPressed(int floor){
 				ordersystem_orderDestination(floor);
 				elev_set_door_open_lamp(0);
 
-				if(stoptime < clock()){
+				if(timer_isTimeout()){
 					elev_set_motor_direction(DIRN_DOWN);
 				}
 
@@ -162,7 +164,7 @@ void fsm_destinationButtonPressed(int floor){
 				state = upwards;
 				ordersystem_orderDestination(floor);
 
-				if(stoptime < clock()){
+				if(timer_isTimeout()){
 					floorBelow++;
 					elev_set_motor_direction(DIRN_UP);
 				}
@@ -192,7 +194,7 @@ void fsm_destinationButtonPressed(int floor){
 
 void fsm_doorOpen(int floor){
 	elev_set_motor_direction(DIRN_STOP);
-	stoptime = clock() + 3 * CLOCKS_PER_SEC;
+	timer_startTimer();
 	ordersystem_removeOrder(floor);
 	elev_set_door_open_lamp(1);
 }

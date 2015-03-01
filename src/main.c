@@ -1,6 +1,7 @@
 #include "elev.h"
 #include <stdio.h>
 #include "fsm.h"
+#include "timer.h"
 
 
 int main() {
@@ -50,7 +51,7 @@ int main() {
 			}
 		}
 		lastTimedOut = timedOut;
-		timedOut = stoptime < clock();
+		timedOut = timer_isTimeout();
 		if (timedOut == 1 && lastTimedOut == 0){
 			fsm_timeout();
 		}
