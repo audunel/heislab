@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include "time.h"
 
-typedef enum {downwards, wait, upwards, stop, doorOpenUp, doorOpenDown} states;
+typedef enum {downwards, wait, upwards, stop} states;
 
 static states state;
 static int floorBelow; // Den nærmeste etasjen i retning ned.
@@ -12,56 +12,57 @@ static int floorBelow; // Den nærmeste etasjen i retning ned.
 int stoptime;
 
 
+// getDirection1 brukes når heisen sist var på vei oppover. I motsatt tilfelle brukes getDirection2.
 
-states orderUp(int floor){
+states getDirection1(int floor){
 	for (int c = floor + 1; c < 4; c++){
 		if(getDestination(c) || getOrder(0, c) || getOrder(1, c)){
-			printf("upwards\n");
 			return upwards;
 		}
 	}
 	for (int c = floor - 1; c >= 0; c--){
 		if(getDestination(c) || getOrder(0, c) || getOrder(1, c)){
-			printf("downwards\n");
 			return downwards;
 		}
 	}
-	printf("wait\n");
 	return wait;
 }
 
-states orderDown(int floor){
+states getDirection2(int floor){
 	for (int c = floor - 1; c >= 0; c--){
 		if(getDestination(c) || getOrder(0, c) || getOrder(1, c)){
-			printf("downwards\n");
 			return downwards;
 		}
 	}
 	for (int c = floor + 1; c < 4; c++){
 		if(getDestination(c) || getOrder(0, c) || getOrder(1, c)){
-			printf("upwards\n");
 			return upwards;
 		}
 	}
-	printf("wait\n");
 	return wait;
 }
 
-void orderButton(int up, int floor){
+
+// orderButtonPressed er for knappene "utenfor" heisen. up == 0 impliserer at ned knappen har blitt trykket.
+
+void orderButtonPressed(int up, int floor){ 
 	switch (state){
 	case wait:
 		if(elev_get_floor_sensor_signal() > floor){
-			printf("downwards\n");
+
 			state = downwards;
 			order(up, floor);
+
 			if(stoptime < clock()){
 				elev_set_motor_direction(DIRN_DOWN);
 			}
 		}else if(elev_get_floor_sensor_signal() < floor){
-			printf("upwards\n");
+
 			state = upwards;
 			order(up, floor);
+
 			if(stoptime < clock()){
+
 				elev_set_motor_direction(DIRN_UP);
 				floorBelow++;
 			}
@@ -73,7 +74,6 @@ void orderButton(int up, int floor){
 		if(elev_get_floor_sensor_signal() != -1){
 			if(elev_get_floor_sensor_signal() > floor){
 
-				printf("downwards\n");
 				state = downwards;
 				order(up, floor);
 				elev_set_door_open_lamp(0);
@@ -85,7 +85,6 @@ void orderButton(int up, int floor){
 			}else if(elev_get_floor_sensor_signal() < floor){
 
 				elev_set_door_open_lamp(0);
-				printf("upwards\n");
 				state = upwards;
 				order(up, floor);
 
@@ -101,11 +100,9 @@ void orderButton(int up, int floor){
 			order(up, floor);
 
 			if(floorBelow >= floor){
-				printf("downwards\n");
 				state = downwards;
 				elev_set_motor_direction(DIRN_DOWN);
 			}else{
-				printf("upwards\n");
 				state = upwards;
 				elev_set_motor_direction(DIRN_UP);
 			}
@@ -117,20 +114,27 @@ void orderButton(int up, int floor){
 	}
 }
 
+
+/*
+destinationButtonPressed er for knappene "innenfor" heisen. Denne funksjonen er for øvrig identisk med orderButtonPressed med unntak av
+at orderDestination kalles istedenfor order */
+ 
 void destinationButtonPressed(int floor){
 	switch (state){
 	case wait:
 		if(elev_get_floor_sensor_signal() > floor){
-			printf("downwards\n");
+
 			state = downwards;
 			orderDestination(floor);
+
 			if(stoptime < clock()){
 				elev_set_motor_direction(DIRN_DOWN);
 			}
 		}else if(elev_get_floor_sensor_signal() < floor){
-			printf("upwards\n");
+
 			state = upwards;
 			orderDestination(floor);
+
 			if(stoptime < clock()){
 				elev_set_motor_direction(DIRN_UP);
 				floorBelow++;
@@ -141,9 +145,9 @@ void destinationButtonPressed(int floor){
 		break;
 	case stop:
 		if(elev_get_floor_sensor_signal() != -1){
+
 			if(elev_get_floor_sensor_signal() > floor){
 
-				printf("downwards\n");
 				state = downwards;
 				orderDestination(floor);
 				elev_set_door_open_lamp(0);
@@ -155,7 +159,6 @@ void destinationButtonPressed(int floor){
 			}else if(elev_get_floor_sensor_signal() < floor){
 
 				elev_set_door_open_lamp(0);
-				printf("upwards\n");
 				state = upwards;
 				orderDestination(floor);
 
@@ -171,11 +174,11 @@ void destinationButtonPressed(int floor){
 			orderDestination(floor);
 
 			if(floorBelow >= floor){
-				printf("downwards\n");
+
 				state = downwards;
 				elev_set_motor_direction(DIRN_DOWN);
 			}else{
-				printf("upwards\n");
+
 				state = upwards;
 				elev_set_motor_direction(DIRN_UP);
 			}
@@ -197,20 +200,22 @@ void doorOpen(int floor){
 void floorSignal(int floor){
 	switch (state){
 	case upwards:
-		state = orderUp(floor);
+		state = getDirection1(floor);
 		if (getDestination(floor) || getOrder(1, floor) || state != upwards){
+
 			doorOpen(floor);
 		}else{
 			floorBelow++;
 		}
 		break;
 	case downwards:
-		state = orderDown(floor);
+		state = getDirection2(floor);
+
 		if (getDestination(floor) || getOrder(0, floor) || state != downwards){
 			doorOpen(floor);
 		}
+
 		floorBelow--;
-		printf("\nfb %d\n", floorBelow);
 		break;
 	}
 }
@@ -220,7 +225,6 @@ void timeout(){
 	case upwards:
 		elev_set_motor_direction(DIRN_UP);
 		floorBelow++;
-		printf("\nfb %d\n", floorBelow);
 		elev_set_door_open_lamp(0);
 		break;
 	case downwards:
@@ -233,13 +237,15 @@ void timeout(){
 }
 
 void stopButtonPressed(){
-	printf("floor below %d\n", floorBelow);
+
 	elev_set_motor_direction(DIRN_STOP);
 	state = stop;
 	clearAll();
+
 	if(elev_get_floor_sensor_signal() != -1) {
 		elev_set_door_open_lamp(1);
 	}
+
 	elev_set_stop_lamp(1);
 	while(elev_get_stop_signal()){}
 	elev_set_stop_lamp(0);
@@ -248,16 +254,16 @@ void stopButtonPressed(){
 void initialize(){
 	int floor = elev_get_floor_sensor_signal();
 	if(floor != -1){
+
 		state = wait;
 		elev_set_motor_direction(DIRN_STOP);
 		floorBelow = floor - 1;
-		printf("\nfb %d\n", floorBelow);
 		return;
 	}
 	elev_set_motor_direction(DIRN_UP);
+
 	while((floor = elev_get_floor_sensor_signal()) == -1){}
 	state = wait;
 	elev_set_motor_direction(DIRN_STOP);
 	floorBelow = floor - 1;
-	printf("\nfb %d\n", floorBelow);
 }

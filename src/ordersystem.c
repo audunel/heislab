@@ -6,7 +6,7 @@ static int upOrder[4] = {0, 0, 0, 0};
 static int downOrder[4] = {0, 0, 0, 0};
 static int destination[4] = {0, 0, 0, 0};
 
-void order(int up, int floor){
+void order(int up, int floor){ // For bestillinger "utenfor" heisen. up == 0 impliserer ned.
 	if(up){
 		upOrder[floor] = 1;
 		elev_set_button_lamp(BUTTON_CALL_UP, floor, 1);
@@ -16,7 +16,7 @@ void order(int up, int floor){
 	}
 }
 
-void orderDestination(int floor){
+void orderDestination(int floor){ // For bestillinger "innenfor" heisen.
 	destination[floor] = 1;
 	elev_set_button_lamp(BUTTON_COMMAND, floor, 1);
 }
